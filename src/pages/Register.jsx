@@ -1,22 +1,111 @@
 import React from 'react'
+import toast from 'react-hot-toast'
 import Widget101 from '../components/Widget101'
 import { NavLink, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Icon } from 'react-icons-kit';
+import { eyeOff } from 'react-icons-kit/feather/eyeOff';
+import { eye } from 'react-icons-kit/feather/eye'
+import FadeLoader from 'react-spinners/FadeLoader';
+import axios from 'axios';
 
 const Register = () => {
+
+    const [icon, setIcon] = useState(eyeOff);
+    const [type, setType] = useState('password');
+    const [loading, setLoading] = useState(false);
+    const [data, setData] = useState({ name: '', email: '', country: '', currency: '', account: '', password: '', comfirm_password: '' });
+
+    const handleToggle = () => {
+        if (type === 'password') {
+            setIcon(eye);
+            setType('text')
+        } else {
+            setIcon(eyeOff)
+            setType('password')
+        }
+    }
+
+    const createUser = async (e) => {
+        e.preventDefault();
+        setLoading(false);
+
+        const {
+            name,
+            email,
+            country,
+            currency,
+            account,
+            password,
+            comfirm_password
+        } = data;
+
+        await axios.post("/register", {
+            name,
+            email,
+            country,
+            currency,
+            account,
+            password,
+            comfirm_password
+        }).then((data) => {
+            if (data.data.error) {
+                setLoading(false);
+                toast.error(data.data.error);
+            } else {
+                setLoading(false);
+                console.log(data.data);
+                const newUser = JSON.stringify(data.data);
+                localStorage.setItem("user", newUser);
+                setData({
+                    name: '',
+                    email: '',
+                    country: '',
+                    currency: '',
+                    account: '',
+                    password: '',
+                    comfirm_password: ''
+                })
+                toast.success("Account created successfully!")
+                setTimeout(() => {
+                    location.href = "/dashboard";
+                }, 2000);
+            }
+        })
+    }
+
     return (
         <>
             <div className="container-fluid ">
                 <Widget101 />
                 <h3 className="card-title text-left text-warning mt-4 mb-3">| Register | Account |</h3>
-                <form>
+                <form onSubmit={createUser}>
                     <div className="form-group">
-                        <input type="text" className="data form-control" placeholder='*Full-Name' style={{marginLeft: "2px"}} required />
+                        <input
+                            type="text"
+                            value={data.name}
+                            onChange={(e) => setData({ ...data, name: e.target.value })}
+                            className="data form-control"
+                            placeholder='*Full-Name'
+                            style={{ marginLeft: "2px" }} />
                     </div>
                     <div className="form-group mt-3">
-                        <input type="email" placeholder="example@mail.com" className="data form-control" style={{marginLeft: "2px"}} required />
+                        <input
+                            type="email"
+                            placeholder="example@mail.com"
+                            className="data form-control"
+                            value={data.email}
+                            onChange={(e) => setData({ ...data, email: e.target.value })}
+                            style={{ marginLeft: "2px" }} />
                     </div>
+                    <FadeLoader
+                        color="#36d7b7"
+                        loading={loading}
+                        speedMultiplier={3}
+                        style={{ textAlign: 'center', position: 'absolute', left: '50%', zIndex: '1' }}
+                    />
                     <div className="form-group mt-3">
-                        <select className="data form-control" name="country" style={{marginLeft: "2px"}} required >
+                        <select value={data.country} onChange={(e) => setData({ ...data, country: e.target.value })} className="data form-control" style={{ marginLeft: "2px" }} >
                             <option>--Select Country--</option>
                             <option>Afghanistan</option>
                             <option>Albania</option>
@@ -263,7 +352,7 @@ const Register = () => {
                         </select>
                     </div>
                     <div className="form-group mt-3">
-                        <select className="data form-control" style={{marginLeft: "2px"}} required >
+                        <select value={data.currency} onChange={(e) => setData({ ...data, currency: e.target.value })} className="data form-control" style={{ marginLeft: "2px" }} >
                             <option>--Select Currency--</option>
                             <option className="text-light" value="£">POUNDS £</option>
                             <option className="text-light" value="$">DOLLAR $</option>
@@ -277,7 +366,7 @@ const Register = () => {
                         </select>
                     </div>
                     <div className="form-group mt-3">
-                        <select className="data form-control" style={{marginLeft: "2px"}} required >
+                        <select value={data.account} onChange={(e) => setData({ ...data, account: e.target.value })} className="data form-control" style={{ marginLeft: "2px" }} >
                             <option>--Select Account--</option>
                             <option>Forex Trading</option>
                             <option>Stock Trading</option>
@@ -286,16 +375,36 @@ const Register = () => {
                             <option>CryptoCurrency Investment</option>
                         </select>
                     </div>
-                    <div className="form-group mt-3">
-                        <input type="password" className="data form-control" placeholder='*password' style={{marginLeft: "2px"}} required />
+                    <div className="box-auth-pass form-group mt-3">
+                        <input
+                            type={type}
+                            value={data.password}
+                            onChange={(e) => setData({ ...data, password: e.target.value })}
+                            className="data form-control"
+                            placeholder='*password'
+                            style={{ marginLeft: "2px" }}
+                        />
+                        <span className="show-pass" onClick={handleToggle}>
+                            <Icon class="absolute mr-10 text-dark" icon={icon} size={15} />
+                        </span>
                     </div>
-                    <div className="form-group mt-3">
-                        <input type="password" className="data form-control" placeholder='*comfirm-password' style={{marginLeft: "2px"}} required />
+                    <div className="box-auth-pass form-group mt-3">
+                        <input
+                            type={type}
+                            value={data.comfirm_password}
+                            onChange={(e) => setData({ ...data, comfirm_password: e.target.value })}
+                            className="data form-control"
+                            placeholder='*comfirm-password'
+                            style={{ marginLeft: "2px" }}
+                        />
+                        <span className="show-pass" onClick={handleToggle}>
+                            <Icon class="absolute mr-10 text-dark" icon={icon} size={15} />
+                        </span>
                     </div>
                     <div className="mt-2 form-group d-flex align-items-center justify-content-between">
                         <div className="form-check">
                             <label className="form-check-label">
-                                <input type="checkbox" className="form-check-input" required /> Remember me </label>
+                                <input type="checkbox" className="form-check-input" /> Remember me </label>
                         </div>
                         <a href="#" className="forgot-pass text-warning">Forgot password</a>
                     </div>

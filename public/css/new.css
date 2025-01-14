@@ -9,6 +9,35 @@ body {
   top: 0px !important;
 }
 
+.box-auth-pass {
+  position: relative;
+}
+
+.show-pass,
+.show-pass2 {
+  position: absolute;
+  right: 16px;
+  top: 9px;
+  cursor: pointer;
+}
+.show-pass .icon-view,
+.show-pass2 .icon-view {
+  display: none;
+}
+.show-pass i,
+.show-pass2 i {
+  font-size: 14px;
+  color: var(--white);
+}
+.show-pass.active .icon-view,
+.show-pass2.active .icon-view {
+  display: inline-block;
+}
+.show-pass.active .icon-view-hide,
+.show-pass2.active .icon-view-hide {
+  display: none;
+}
+
 .modal-body-scroll {
   max-height: 300px; /* Adjust based on your modal size */
   overflow-y: auto;

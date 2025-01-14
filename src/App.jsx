@@ -8,8 +8,8 @@ import Withdraw from "./pages/Withdraw";
 import Settings from "./pages/Settings";
 import Dashboard from "./pages/Dashboard";
 import AdminLogin from "./admin/pages/AdminLogin";
-
-import axios from "axios";
+import axios from 'axios';
+import { Toaster } from 'react-hot-toast';
 
 import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
@@ -19,20 +19,23 @@ axios.defaults.withCredentials = true;
 function App() {
 
   return (
-    <Router>
-      <Routes>
-        <Route index="/" element={<Index />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/admin" element={<Admin />} />
-        <Route path="/contact" element={<Contact />} />
-        <Route path="/register" element={<Register />} />
-        <Route path="/deposite" element={<Deposite />} />
-        <Route path="/withdraw" element={<Withdraw />} />
-        <Route path="/settings" element={<Settings />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/admin/login" element={<AdminLogin />} />
-      </Routes>
-    </Router>
+    <>
+      <Toaster position='top-right' toastOptions={{ duration: 4000 }} />
+      <Router>
+        <Routes>
+          <Route index="/" element={<Index />} />
+          <Route path="/login" element={<Login />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path="/contact" element={<Contact />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="/deposite" element={<Deposite />} />
+          <Route path="/withdraw" element={<Withdraw />} />
+          <Route path="/settings" element={<Settings />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/admin/login" element={<AdminLogin />} />
+        </Routes>
+      </Router>
+    </>
   )
 }
 

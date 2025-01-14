@@ -6,6 +6,12 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
 const MainNavBar = () => {
+
+    const logout = () => {
+        localStorage.removeItem("user");
+        location.href = "/login";
+    }
+
     return (
         <Navbar style={{ position: "fixed", width: "100%", zIndex: "1", top: "0" }} expand="lg" className="bg-primary">
             <Container fluid>
@@ -22,6 +28,7 @@ const MainNavBar = () => {
                         <Nav.Link href="/withdraw"><i className="fas fa-hand-holding-usd text-white p-1"></i>Withdraw</Nav.Link>
                         <Nav.Link href="/settings"><i class="fas fa-cog text-white p-1"></i>Account Settings</Nav.Link>
                         <Nav.Link href="/contact"><i className="fas fa-question-circle text-white p-1"></i>Contact Support</Nav.Link>
+                        <Nav.Link onClick={logout} href="#"><i className="fas fa-sign-out-alt text-danger p-1"></i>Logout</Nav.Link>
                         <NavDropdown title="Where to Buy" id="navbarScrollingDropdown">
                             <NavDropdown.Item href="#action3">Where to Buy</NavDropdown.Item>
                             <NavDropdown.Item href="https://bitso.com/">

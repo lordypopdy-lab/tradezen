@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import { useState } from 'react'
 import Widget101 from '../components/Widget101'
 import Widget102 from '../components/Widget102'
@@ -10,8 +10,20 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 const Dashboard = () => {
 
     const balance = "1234.56";
+    const [user, setUser] = useState(null);
     const [message, setMessage] = useState("");
     const [isBalanceVisible, setIsBalanceVisible] = useState(false);
+
+    const newU = localStorage.getItem("user");
+
+    useEffect(() => {
+        if (newU) {
+            const newUser = JSON.parse(newU);
+            setUser(newUser);
+        } else {
+            window.location.href = "/login";
+        }
+    }, [])
 
     const toggleBalanceVisibility = () => {
         setIsBalanceVisible((prev) => !prev);
@@ -21,7 +33,7 @@ const Dashboard = () => {
         alert("Message Sent!");
     }
 
-    
+
     return (
         <>
             <MainNavBar />
@@ -29,6 +41,8 @@ const Dashboard = () => {
                 <div className="container-fluid page-body-wrapper">
                     <div className="main-panel m-0 w-100">
                         <div className="content-wrapper">
+                            <h5 className="display-5 text-center">Welcome back.</h5>
+                            <h6 className="display-6 text-center">{user && user.name}!</h6>
                             <Widget102 />
                             <Widget101 />
                             <div className="row">
@@ -61,8 +75,8 @@ const Dashboard = () => {
                                             </div>
                                             <div className="text-center btn-group ml-1">
                                                 <button className="btn-special deposite"><a href="/deposite" style={{ fontWeight: "600" }} className="text-white mt-4"><i style={{ borderBottomLeftRadius: "15px", borderTopRightRadius: "15px" }} className="fas fa-wallet d-block mb-1 bg-dark text-warning action-icons p-3"></i>Deposite</a></button>
-                                                <button className="btn-special withdraw"><a href="/withdraw" style={{ fontWeight: "600" }} className="text-white mt-4"><i style={{ borderBottomLeftRadius: "15px", borderTopRightRadius: "15px" }} className="fas fa-paper-plane fa-lg me-2 d-block text-warning bg-dark p-3"></i>Withdraw</a></button>
-                                                <button className="btn-special withdraw"><a href="https://www.coinbase.com/" style={{ fontWeight: "600" }} className="text-white "><i style={{ borderBottomLeftRadius: "15px", borderTopRightRadius: "15px" }} className="fas fa-credit-card text-warning bg-dark p-3"></i>Buy</a></button>
+                                                <button className="btn-special withdraw"><a href="/withdraw" style={{ fontWeight: "600" }} className="text-white mt-4"><i style={{ borderBottomLeftRadius: "15px", borderTopRightRadius: "15px", marginLeft: "35px" }} className="fas fa-paper-plane fa-lg me-2 d-block text-warning bg-dark p-3"></i>Withdraw</a></button>
+                                                <button className="btn-special text-center withdraw"><a href="https://www.coinbase.com/" style={{ fontWeight: "600" }} className="text-white "><i style={{ borderBottomLeftRadius: "15px", borderTopRightRadius: "15px", marginLeft: "20px" }} className="fas fa-credit-card text-warning bg-dark p-3"></i>Buy Assets</a></button>
                                             </div>
                                         </div>
                                     </div>

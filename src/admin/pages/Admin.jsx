@@ -12,6 +12,7 @@ import Badge from 'react-bootstrap/Badge';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Table from 'react-bootstrap/Table';
 import axios from 'axios'
+import toast from "react-hot-toast"
 
 const Admin = () => {
 
@@ -19,13 +20,15 @@ const Admin = () => {
         location.href = "/admin/login";
     }
 
-    const  [balance, setBalance] = useState(0);
+    const [balance, setBalance] = useState(0);
     const [users, setUsers] = useState([]);
     const [show, setShow] = useState(false);
     const [show1, setShow1] = useState(false);
     const [show2, setShow2] = useState(false);
     const [message, setMessage] = useState("");
+    const [adder, setAdder] = useState({ id: "", value: "", type: "" });
     const [isLoading, setLoading] = useState(false);
+    const [isLoading1, setLoading1] = useState(false);
     const [isBalanceVisible, setIsBalanceVisible] = useState(false);
 
     useEffect(() => {
@@ -56,6 +59,35 @@ const Admin = () => {
         }
     }, [isLoading]);
 
+    const addBalance = async () => {
+        { !isLoading1 ? setLoading1(true) : null }
+        const { id, value, type } = adder;
+
+        try {
+            await axios.post('/addBalance', {
+                id,
+                value,
+                type
+            }).then((data) => {
+                if (data.data.error) {
+                    toast.error(data.data.error);
+                    setLoading1(false)
+                } else if (data.data.success) {
+                    toast.success(data.data.success)
+                    console.log(data.data.success);
+                    setLoading1(false)
+                    setAdder({
+                        id: "",
+                        value: "",
+                        type: ""
+                    })
+                }
+            })
+        } catch (error) {
+            console.log("Error Adding Balance: ", error);
+        }
+    }
+
     const handleClick = () => setLoading(true);
 
     const toggleBalanceVisibility = () => {
@@ -75,6 +107,15 @@ const Admin = () => {
     const handleClose2 = () => setShow2(false);
     const handleShow2 = () => setShow2(true);
 
+    const handleCopy = async (textToCopy) => {
+        try {
+            await navigator.clipboard.writeText(textToCopy);
+            toast.success("Copied successfully!");
+        } catch (err) {
+            toast.error("Failed to copy!")
+        }
+    };
+
     return (
         <div>
             <NavBar />
@@ -89,30 +130,45 @@ const Admin = () => {
                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                 <InputGroup className="mb-3">
                                     <InputGroup.Text className='bg-dark'>#ID</InputGroup.Text>
-                                    <Form.Control type='number' className='bg-dark' aria-label="Amount (to the nearest dollar)" />
+                                    <Form.Control
+                                        value={adder.id}
+                                        onChange={(e) => setAdder({ ...adder, id: e.target.value })}
+                                        type='text'
+                                        className='bg-dark'
+                                        aria-label="Amount (to the nearest dollar)"
+                                    />
                                 </InputGroup>
                             </Form.Group>
                             <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                 <InputGroup className="mb-3">
                                     <InputGroup.Text className='bg-dark'>$</InputGroup.Text>
-                                    <Form.Control type='number' className='bg-dark' aria-label="Amount (to the nearest dollar)" />
+                                    <Form.Control
+                                        type='number'
+                                        value={adder.value}
+                                        onChange={(e) => setAdder({ ...adder, value: e.target.value })}
+                                        className='bg-dark'
+                                        aria-label="Amount (to the nearest dollar)"
+                                    />
                                     <InputGroup.Text className='card-gradient'>.00</InputGroup.Text>
                                 </InputGroup>
                             </Form.Group>
-                            <Form.Select className='bg-dark' aria-label="Default select example">
+                            <Form.Select value={adder.type} onChange={(e) => setAdder({ ...adder, type: e.target.value })} className='bg-dark' aria-label="Default select example">
                                 <option>Open this select menu</option>
-                                <option value="bonus">Add bonus</option>
+                                <option value="bonuse">Add bonus</option>
                                 <option value="profit">Add Profit</option>
-                                <option value="3">Add Deposite</option>
+                                <option value="deposit">Add Deposite</option>
                             </Form.Select>
                         </Form>
                     </Modal.Body>
-                    <Modal.Footer className='bg-dark'>
-                        <Button variant="secondary" onClick={handleClose}>
+                    <Modal.Footer className='bg-dark d-flex justify-content-between'>
+                        <Button style={{ padding: "8px", width: "120px" }} variant="secondary" onClick={handleClose}>
                             Close
                         </Button>
-                        <Button variant="primary" onClick={handleClose}>
-                            Save Changes
+                        <Button
+                            onClick={addBalance} s
+                            tyle={{ padding: "1px", width: "160px" }}
+                            variant="primary">
+                            {isLoading1 ? "Saving..." : "Save Changes"}
                         </Button>
                     </Modal.Footer>
                 </Modal>
@@ -136,8 +192,8 @@ const Admin = () => {
                             <tbody>
                                 {users.length > 0 ? (
                                     users.map((user) => (
-                                        <tr key={user.id}>
-                                            <td>{user.id}</td>
+                                        <tr key={user._id}>
+                                            <td onClick={() => handleCopy(user._id)}><i style={{ cursor: "pointer" }} className='fas fa-copy'></i>{user._id.slice(1, 5)}..</td>
                                             <td>
                                                 <Button
                                                     variant="primary"
@@ -280,7 +336,7 @@ const Admin = () => {
                                                 <div className="col">
                                                     <h6 className="card-title">Total Users</h6>
                                                     <div className="d-flex align-items-center align-self-start">
-                                                        <h5 style={{ fontSize: "19px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <>{users.length >=1 ? users.length : "loading..."}</> : "******"}</h5>
+                                                        <h5 style={{ fontSize: "19px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <>{users.length >= 1 ? users.length : "loading..."}</> : "******"}</h5>
                                                         <p className="text-warning ml-2 mb-0 font-weight-small">+28%</p>
                                                     </div>
                                                     <button onClick={handleShow1} style={{ height: "40px", fontSize: "12px" }} className="btn p-2 btn-gray ">View | Users<span className="fas m-1 fa-arrow-down"></span></button>

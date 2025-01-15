@@ -9,7 +9,6 @@ import { Icon } from 'react-icons-kit';
 import { eyeOff } from 'react-icons-kit/feather/eyeOff';
 import { eye } from 'react-icons-kit/feather/eye'
 import toast from 'react-hot-toast';
-import { faL } from '@fortawesome/free-solid-svg-icons';
 
 const Login = () => {
 

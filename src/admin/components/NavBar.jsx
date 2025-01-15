@@ -6,6 +6,11 @@ import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 
 const NavBar = () => {
+
+    const logout = async() => {
+        localStorage.removeItem("admin");
+        window.location.href = "/admin/login"
+    }
     return (
         <div>
             <Navbar style={{ position: "fixed", width: "100%", zIndex: "1", top: "0" }} expand="lg" className="bg-primary">
@@ -23,6 +28,7 @@ const NavBar = () => {
                             <Nav.Link href="/withdraw"><i className="fas fa-hand-holding-usd text-white p-1"></i>Withdraw</Nav.Link>
                             <Nav.Link href="/settings"><i class="fas fa-cog text-white p-1"></i>Account Settings</Nav.Link>
                             <Nav.Link href="/contact"><i className="fas fa-question-circle text-white p-1"></i>Contact Support</Nav.Link>
+                            <Nav.Link onClick={logout} href="#"><i className="fas fa-sign-out-alt text-danger p-1"></i>Logout</Nav.Link>
                         </Nav>
                     </Navbar.Collapse>
                 </Container>

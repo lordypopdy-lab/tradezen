@@ -11,14 +11,16 @@ import Modal from 'react-bootstrap/Modal';
 import Badge from 'react-bootstrap/Badge';
 import InputGroup from 'react-bootstrap/InputGroup';
 import Table from 'react-bootstrap/Table';
+import axios from 'axios'
 
 const Admin = () => {
 
-    if (!localStorage.getItem("Auth")) {
+    if (!localStorage.getItem("admin")) {
         location.href = "/admin/login";
     }
 
-    const balance = "2034.56";
+    const  [balance, setBalance] = useState(0);
+    const [users, setUsers] = useState([]);
     const [show, setShow] = useState(false);
     const [show1, setShow1] = useState(false);
     const [show2, setShow2] = useState(false);
@@ -27,6 +29,20 @@ const Admin = () => {
     const [isBalanceVisible, setIsBalanceVisible] = useState(false);
 
     useEffect(() => {
+
+        const getUsers = async () => {
+            try {
+                await axios.get('/getUsers').then((data) => {
+                    if (data.data.length > 0) {
+                        setUsers(data.data);
+                    }
+                })
+            } catch (error) {
+                console.log(`Error Getting Users: `, error);
+            }
+        }
+        getUsers()
+
         function simulateNetworkRequest() {
             return new Promise(resolve => {
                 setTimeout(resolve, 2000);
@@ -41,7 +57,6 @@ const Admin = () => {
     }, [isLoading]);
 
     const handleClick = () => setLoading(true);
-
 
     const toggleBalanceVisibility = () => {
         setIsBalanceVisible((prev) => !prev);
@@ -71,7 +86,7 @@ const Admin = () => {
                     </Modal.Header>
                     <Modal.Body className='bg-dark'>
                         <Form className='card-gradient'>
-                        <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
+                            <Form.Group className="mb-3" controlId="exampleForm.ControlInput1">
                                 <InputGroup className="mb-3">
                                     <InputGroup.Text className='bg-dark'>#ID</InputGroup.Text>
                                     <Form.Control type='number' className='bg-dark' aria-label="Amount (to the nearest dollar)" />
@@ -119,15 +134,32 @@ const Admin = () => {
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>1</td>
-                                    <td> <Button variant="primary" style={{ height: "", padding: "4px", fontSize: "14px", width: "70px" }} disabled={isLoading} onClick={!isLoading ? handleClick : null} >{isLoading ? 'Loading…' : 'Send'} </Button></td>
-                                    <td>Brazil</td>
-                                    <td>Forex</td>
-                                    <td>$230.90</td>
-                                    <td>$8977.45</td>
-                                    <td>$78826.51</td>
-                                </tr>
+                                {users.length > 0 ? (
+                                    users.map((user) => (
+                                        <tr key={user.id}>
+                                            <td>{user.id}</td>
+                                            <td>
+                                                <Button
+                                                    variant="primary"
+                                                    style={{ height: "auto", padding: "4px", fontSize: "14px", width: "70px" }}
+                                                    disabled={isLoading}
+                                                    onClick={!isLoading ? handleClick : null}
+                                                >
+                                                    {isLoading ? "Loading…" : "Send"}
+                                                </Button>
+                                            </td>
+                                            <td>{user.country}</td>
+                                            <td>{user.account}</td>
+                                            <td>{user.currency}{user.profit.toFixed(2)}</td>
+                                            <td>{user.currency}{user.bonuse.toFixed(2)}</td>
+                                            <td>{user.currency}{user.deposit.toFixed(2)}</td>
+                                        </tr>
+                                    ))
+                                ) : (
+                                    <tr>
+                                        <td colSpan="7" style={{ textAlign: "center" }}>No users available</td>
+                                    </tr>
+                                )}
                             </tbody>
                         </Table>
                     </Modal.Body>
@@ -136,7 +168,8 @@ const Admin = () => {
                             Close
                         </Button>
                         <Button variant="primary" style={{ padding: "8px", width: "160px" }} onClick={handleClose1}>
-                            Save Changes
+                            Done
+                            <i className='fas text-light m-1 fa-check'></i>
                         </Button>
                     </Modal.Footer>
                 </Modal>
@@ -191,7 +224,7 @@ const Admin = () => {
                                                 <div className="col-10">
                                                     <h3 className="text-muted font-weight-normal">Market Cap</h3>
                                                     <div style={{ paddingBottom: "17px" }} className="d-flex mt-2 align-items-center align-self-start">
-                                                        <h5 className="display-4 ls-3 text-center">Bal: {isBalanceVisible ? <><span className="text-600">$</span>{balance}</> : "******"}</h5>
+                                                        <h5 className="display-4 ls-3 text-center">Bal: {isBalanceVisible ? <><span className="text-600">$</span>{balance.toFixed(2)}</> : "******"}</h5>
                                                         <span
                                                             onClick={toggleBalanceVisibility}
                                                             style={{
@@ -220,9 +253,9 @@ const Admin = () => {
                                         <div className="card-body">
                                             <div className="row">
                                                 <div style={{ marginBottom: "-50px" }} className="col-9 p-3">
-                                                    <h6 className="text-muted font-weight-normal">Bonuse Added</h6>
+                                                    <h6 className="text-muted font-weight-normal">value Added</h6>
                                                     <div className="d-flex align-items-center align-self-start">
-                                                        <h5 style={{ fontSize: "24px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <><span className="text-600">$</span>{balance}</> : "******"}</h5>
+                                                        <h5 style={{ fontSize: "24px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <><span className="text-600">$</span>{balance.toFixed(2)}</> : "******"}</h5>
                                                         <p className="text-warning ml-2 mb-0 font-weight-medium">+18%</p>
                                                     </div>
 
@@ -233,7 +266,7 @@ const Admin = () => {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <button onClick={handleShow} style={{ height: "40px", fontSize: "12px" }} className="btn p-2 btn-gray mt-4">Add Bonus<span className="fas m-1 fa-arrow-right"></span></button>
+                                            <button onClick={handleShow} style={{ height: "40px", fontSize: "12px" }} className="btn p-2 btn-gray mt-4">Balance Adder<span className="fas m-1 fa-plus"></span></button>
                                         </div>
                                     </div>
                                 </div>
@@ -247,7 +280,7 @@ const Admin = () => {
                                                 <div className="col">
                                                     <h6 className="card-title">Total Users</h6>
                                                     <div className="d-flex align-items-center align-self-start">
-                                                        <h5 style={{ fontSize: "19px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <>{balance}</> : "******"}</h5>
+                                                        <h5 style={{ fontSize: "19px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <>{users.length >=1 ? users.length : "loading..."}</> : "******"}</h5>
                                                         <p className="text-warning ml-2 mb-0 font-weight-small">+28%</p>
                                                     </div>
                                                     <button onClick={handleShow1} style={{ height: "40px", fontSize: "12px" }} className="btn p-2 btn-gray ">View | Users<span className="fas m-1 fa-arrow-down"></span></button>
@@ -292,10 +325,10 @@ const Admin = () => {
                                                         <td>Andrew Rita</td>
                                                         <td>Paid</td>
                                                         <td>example@gmail.com</td>
-                                                        <td><Button style={{fontSize: "14px"}} variant="warning p-2 m-1">Decline</Button></td>
-                                                        <td> <Button style={{fontSize: "14px"}} variant="success p-2 m-1">Approve</Button></td>
-                                                       <td><Button style={{fontSize: "14px"}} variant="danger p-2 m-1">Delete</Button></td>
-                                                       <td></td>
+                                                        <td><Button style={{ fontSize: "14px" }} variant="warning p-2 m-1">Decline</Button></td>
+                                                        <td> <Button style={{ fontSize: "14px" }} variant="success p-2 m-1">Approve</Button></td>
+                                                        <td><Button style={{ fontSize: "14px" }} variant="danger p-2 m-1">Delete</Button></td>
+                                                        <td></td>
                                                     </tr>
                                                 </tbody>
                                             </Table>
@@ -326,10 +359,10 @@ const Admin = () => {
                                                         <td>0X09786876986798689898</td>
                                                         <td>Paid</td>
                                                         <td>example@gmail.com</td>
-                                                        <td><Button style={{fontSize: "14px"}} variant="warning p-2 m-1">Decline</Button></td>
-                                                        <td> <Button style={{fontSize: "14px"}} variant="success p-2 m-1">Approve</Button></td>
-                                                       <td><Button style={{fontSize: "14px"}} variant="danger p-2 m-1">Delete</Button></td>
-                                                       <td></td>
+                                                        <td><Button style={{ fontSize: "14px" }} variant="warning p-2 m-1">Decline</Button></td>
+                                                        <td> <Button style={{ fontSize: "14px" }} variant="success p-2 m-1">Approve</Button></td>
+                                                        <td><Button style={{ fontSize: "14px" }} variant="danger p-2 m-1">Delete</Button></td>
+                                                        <td></td>
                                                     </tr>
                                                 </tbody>
                                             </Table>

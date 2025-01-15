@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react'
+import axios from 'axios'
 import { useState } from 'react'
 import Widget101 from '../components/Widget101'
 import Widget102 from '../components/Widget102'
@@ -9,20 +10,28 @@ import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 const Dashboard = () => {
 
-    const balance = "1234.56";
-    const [user, setUser] = useState(null);
+    const [balance, setBalance ] = useState(0);
+    const [user, setUser] = useState([]);
     const [message, setMessage] = useState("");
     const [isBalanceVisible, setIsBalanceVisible] = useState(false);
 
     const newU = localStorage.getItem("user");
-
+    if(!newU) {
+        window.location.href = "/login"
+    }
     useEffect(() => {
-        if (newU) {
+        const getUser = async ()=>{
             const newUser = JSON.parse(newU);
-            setUser(newUser);
-        } else {
-            window.location.href = "/login";
+            const email = newUser.email;
+            await axios.post("/getUser", {email}).then((data)=>{
+                if(data){
+                    setUser(data.data);
+                    const tBalance = data.data.deposit + data.data.profit + data.data.bonuse;
+                    setBalance(tBalance.toFixed(2));
+                }
+            })
         }
+        getUser();
     }, [])
 
     const toggleBalanceVisibility = () => {
@@ -88,7 +97,7 @@ const Dashboard = () => {
                                                 <div style={{ marginBottom: "-50px" }} className="col-9">
                                                     <h6 className="text-muted font-weight-normal">Bonuse</h6>
                                                     <div className="d-flex align-items-center align-self-start">
-                                                        <h5 style={{ fontSize: "24px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <><span className="text-600">$</span>{balance}</> : "******"}</h5>
+                                                        <h5 style={{ fontSize: "24px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <><span className="text-600">$</span>{user.bonuse.toFixed(2) && user.bonuse.toFixed(2)}</> : "******"}</h5>
                                                         <p className="text-warning ml-2 mb-0 font-weight-medium">+18%</p>
                                                     </div>
 
@@ -113,14 +122,14 @@ const Dashboard = () => {
                                                     <h6 className="card-title">Total Profits</h6>
 
                                                     <div className="d-flex align-items-center align-self-start">
-                                                        <h5 style={{ fontSize: "19px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <><span className="text-600">$</span>{balance}</> : "******"}</h5>
+                                                        <h5 style={{ fontSize: "19px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <><span className="text-600">$</span>{user.profit.toFixed(2) && user.profit.toFixed(2)}</> : "******"}</h5>
                                                         <p className="text-warning ml-2 mb-0 font-weight-small">+28%</p>
                                                     </div>
                                                 </div>
                                                 <div className="col">
                                                     <h6 className="card-title">Total Deposite</h6>
                                                     <div className="d-flex align-items-center align-self-start">
-                                                        <h5 style={{ fontSize: "19px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <><span className="text-600">$</span>{balance}</> : "******"}</h5>
+                                                        <h5 style={{ fontSize: "19px" }} className="display-4 ls-3 text-center">{isBalanceVisible ? <><span className="text-600">$</span>{user.deposit.toFixed(2) && user.deposit.toFixed(2)}</> : "******"}</h5>
                                                         <p className="text-warning ml-2 mb-0 font-weight-medium">+68%</p>
                                                     </div>
                                                 </div>

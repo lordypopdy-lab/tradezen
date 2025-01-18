@@ -29,10 +29,30 @@ const Admin = () => {
     const [adder, setAdder] = useState({ id: "", value: "", type: "" });
     const [isLoading, setLoading] = useState(false);
     const [isLoading1, setLoading1] = useState(false);
+    const [bankR, setBankR] = useState([]);
+    const [cryptoR, setCryptoR] = useState([]);
     const [isBalanceVisible, setIsBalanceVisible] = useState(false);
 
     useEffect(() => {
+        const Admin = JSON.parse(localStorage.getItem("admin"));
+        const email = Admin.email;
 
+        const getCryptoRecords = async ()=>{
+            await axios.post("/getCryptoRecords", {email}).then((data)=>{
+                if(data){
+                    console.log(data.data);
+                    setCryptoR(data.data);
+                }
+            })
+        }
+        const getBankRecords = async ()=> {
+            await axios.post("/getBankRecords", {email}).then((data)=>{
+                if(data){
+                    console.log(data);
+                    setBankR(data.data);
+                }
+            })
+        }
         const getUsers = async () => {
             try {
                 await axios.get('/getUsers').then((data) => {
@@ -44,19 +64,19 @@ const Admin = () => {
                 console.log(`Error Getting Users: `, error);
             }
         }
-        getUsers()
-
         function simulateNetworkRequest() {
             return new Promise(resolve => {
                 setTimeout(resolve, 2000);
             });
         }
-
         if (isLoading) {
             simulateNetworkRequest().then(() => {
                 setLoading(false);
             });
         }
+        getUsers();
+        getBankRecords();
+        getCryptoRecords();
     }, [isLoading]);
 
     const addBalance = async () => {

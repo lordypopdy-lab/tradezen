@@ -1,6 +1,8 @@
 import React from 'react'
 import axios from 'axios'
 import toast from 'react-hot-toast'
+import Table from 'react-bootstrap/Table';
+import Button from 'react-bootstrap/Button';
 import { useState, useEffect } from 'react'
 import MainNavBar from '../components/MainNavBar'
 import FadeLoader from 'react-spinners/FadeLoader';
@@ -10,15 +12,36 @@ const Withdraw = () => {
     const [user, setUser] = useState([]);
     const [loading1, setLoading1] = useState(false);
     const [loading2, setLoading2] = useState(false);
+    const [bankR, setBankR] = useState([]);
+    const [cryptoR, setcryptoR] = useState([]);
     const [dataCrypto, setdataCrypto] = useState({ value: "", walletAddress: "" })
     const [data, setData] = useState({ value: 0, bank_name: "", account_name: "", account_number: "", swift_code: "" })
 
     useEffect(() => {
+        const localStore = JSON.parse(localStorage.getItem("user"));
+        const email = localStore.email;
+        const getCryptoRecords = async ()=>{
+            await axios.post("/getCryptoRecords", {email}).then((data)=>{
+                if(data){
+                    setcryptoR(data.data);
+                    console.log(data.data);
+                }
+            })
+        }
+        const getBankRecords = async ()=>{
+            await axios.post("/getBankRecords", {email}).then((data)=>{
+                if(data){
+                    setBankR(data.data);
+                }
+            })
+        }
         const getUser = async () => {
             const localStore = JSON.parse(localStorage.getItem("user"));
             setUser(localStore);
         }
         getUser();
+        getBankRecords();
+        getCryptoRecords();
     }, [])
 
     const handleCopy = async (textToCopy) => {
@@ -29,7 +52,6 @@ const Withdraw = () => {
             toast.error("Failed to copy!")
         }
     };
-
     const bankWithdraw = async () => {
         setLoading1(true);
         const email = user.email
@@ -205,6 +227,83 @@ const Withdraw = () => {
                                                     <button className="btn btn-dark">Cancel</button>
                                                 </div>
                                             </form>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="row">
+                                <div className="col-md-12 grid-margin mt-2 p-2">
+                                    <div style={{ border: "none", borderRadius: "9px" }} className="card p-2 card-gradient">
+                                        <div className="modal-body-scroll">
+                                            <h3 className="card-title text-center">Bank | Withdrawal | Records</h3><hr />
+                                            <Table responsive>
+                                                <thead>
+                                                    <tr>
+                                                        <th>[#]</th>
+                                                        <th>[Amount]</th>
+                                                        <th>[Bank]</th>
+                                                        <th>[Name]</th>
+                                                        <th>[Swift-code]</th>
+                                                        <th>[Status]</th>
+                                                        <th>[Email]</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {bankR.length >= 0 ? (
+                                                        bankR.map((data)=>(
+                                                            <tr key={data._id}>
+                                                            <td>ID{data._id.slice(1, 10)}</td>
+                                                            <td>{user.currency}{data.amount}</td>
+                                                            <td>{data.bank}</td>
+                                                            <td>{data.name}</td>
+                                                            <td>{data.swiftCode}</td>
+                                                            <td>{data.status}</td>
+                                                            <td>{data.email}</td>
+                                                        </tr>
+                                                        ))
+                                                    ): 
+                                                    <tr>                                          
+                                                    <td className='text-center'>No Records Found</td>
+                                                </tr>
+                                                    }
+                                                   
+                                                </tbody>
+                                            </Table>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div className="col-md-12 grid-margin mt-2 p-2">
+                                    <div style={{ border: "none", borderRadius: "9px" }} className="card p-2 card-gradient">
+                                        <div className="modal-body-scroll">
+                                            <h3 className="card-title text-center"> Crypto | Withdrawal | Records</h3><hr />
+                                            <Table responsive>
+                                                <thead>
+                                                    <tr>
+                                                        <th>[#]</th>
+                                                        <th>[Amount]</th>
+                                                        <th>[Wallet]</th>
+                                                        <th>[Status]</th>
+                                                        <th>[Email]</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {cryptoR.length >= 0 ? (
+                                                        cryptoR.map((data)=>(
+                                                            <tr key={data._id}>
+                                                            <td>ID:{data._id.slice(1, 10)}</td>
+                                                            <td>{user.currency}{data.amount}</td>
+                                                            <td onClick={()=>handleCopy(data.cryptoAddress)}>{data.cryptoAddress.slice(1, 10)}</td>
+                                                            <td>{data.status}</td>
+                                                            <td>{data.email}</td>
+                                                            <td></td>
+                                                        </tr>
+                                                        ))
+                                                    ): 
+                                                    <tr>
+                                                    <td className='text-center'>No Records Available</td>
+                                                </tr>}                                               
+                                                </tbody>
+                                            </Table>
                                         </div>
                                     </div>
                                 </div>
